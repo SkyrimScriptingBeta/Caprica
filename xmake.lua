@@ -1,3 +1,6 @@
+-- set minimum xmake version
+set_xmakever("2.9.8")
+
 -- set project
 set_project("caprica")
 set_languages("c++23")
