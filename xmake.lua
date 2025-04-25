@@ -8,24 +8,26 @@ set_version("0.3.0")
 add_requires("boost", { configs = { filesystem = true, program_options = true, container = true } })
 add_requires("pugixml")
 
--- define targets
-target("caprica", function()
-    set_kind("$(kind)")
+namespace("caprica", function()
+    -- define targets
+    target("caprica", function()
+        set_kind("$(kind)")
 
-    -- bind package dependencies
-    add_packages("boost", "pugixml", { public = true })
+        -- bind package dependencies
+        add_packages("boost", "pugixml", { public = true })
 
-    -- add all source files
-    add_files("caprica/**/**.cpp")
+        -- add all source files
+        add_files("caprica/**/**.cpp")
 
-    if is_kind("binary") then
-        add_files("caprica/**.cpp")
-    end
+        if is_kind("binary") then
+            add_files("caprica/**.cpp")
+        end
 
-    -- add all header files
-    add_includedirs("caprica", { public = true })
-    add_headerfiles("(caprica/**.h)")
+        -- add all header files
+        add_includedirs("caprica", { public = true })
+        add_headerfiles("(caprica/**.h)")
 
-    -- add flags
-    add_cxxflags("cl::/Zc:inline", "cl::/bigobj")
+        -- add flags
+        add_cxxflags("cl::/Zc:inline", "cl::/bigobj")
+    end)
 end)
