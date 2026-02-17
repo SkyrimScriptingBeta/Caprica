@@ -51,13 +51,25 @@ struct CapricaReportingContext final {
   template <typename... Args>
   NEVER_INLINE void error(CapricaFileLocation location, std::string_view msg, Args&&... args) {
     errorCount++;
-    maybePushMessage(this, &location, "Error", 0, std::vformat(msg, std::make_format_args(args...)), true);
+    std::string formattedMsg;
+    try {
+      formattedMsg = std::vformat(msg, std::make_format_args(args...));
+    } catch (...) {
+      formattedMsg = std::string(msg);
+    }
+    maybePushMessage(this, &location, "Error", 0, formattedMsg, true);
     breakIfDebugging();
   }
 
   template <typename... Args>
   [[noreturn]] NEVER_INLINE void fatal(CapricaFileLocation location, std::string_view msg, Args&&... args) {
-    maybePushMessage(this, &location, "Fatal Error", 0, std::vformat(msg, std::make_format_args(args...)), true);
+    std::string formattedMsg;
+    try {
+      formattedMsg = std::vformat(msg, std::make_format_args(args...));
+    } catch (...) {
+      formattedMsg = std::string(msg);
+    }
+    maybePushMessage(this, &location, "Fatal Error", 0, formattedMsg, true);
     throw std::runtime_error("");
   }
 
@@ -66,7 +78,13 @@ struct CapricaReportingContext final {
   // file is likely not available.
   template <typename... Args>
   [[noreturn]] NEVER_INLINE static void logicalFatal(std::string_view msg, Args&&... args) {
-    maybePushMessage(nullptr, nullptr, "Fatal Error", 0, std::vformat(msg, std::make_format_args(args...)), true);
+    std::string formattedMsg;
+    try {
+      formattedMsg = std::vformat(msg, std::make_format_args(args...));
+    } catch (...) {
+      formattedMsg = std::string(msg);
+    }
+    maybePushMessage(nullptr, nullptr, "Fatal Error", 0, formattedMsg, true);
     throw std::runtime_error("");
   }
 

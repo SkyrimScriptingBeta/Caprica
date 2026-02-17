@@ -102,13 +102,13 @@ struct std::formatter<caprica::identifier_ref>
 {
   template <class ParseContext>
   constexpr auto parse(ParseContext& ctx) {
-    if (ctx.begin() != ctx.end())
-      throw format_error("invalid format");
-    return ctx.end();
+    return ctx.begin();
   }
 
   template <class FormatContext>
   auto format(const caprica::identifier_ref& str, FormatContext& ctx) const {
-    return std::format_to(ctx.out(), "{}", str.to_string_view());
+    if (str.data() == nullptr || str.size() == 0)
+      return std::format_to(ctx.out(), "(unknown)");
+    return std::format_to(ctx.out(), "{}", std::string_view(str.data(), str.size()));
   }
 };

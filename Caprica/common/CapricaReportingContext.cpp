@@ -83,18 +83,28 @@ void CapricaReportingContext::maybePushMessage(CapricaReportingContext* ctx,
                                                size_t warningNumber,
                                                const std::string& msg,
                                                bool forceAsError) {
+  // Try to format location, but don't let format failures hide the actual error
+  std::string locationStr;
+  if (ctx && location) {
+    try {
+      locationStr = ctx->formatLocation(*location);
+    } catch (...) {
+      locationStr = ctx->filename + " (unknown location)";
+    }
+  }
+
   if (warningNumber != 0) {
     if (ctx->isWarningEnabled(*location, warningNumber)) {
       if (ctx->isWarningError(*location, warningNumber)) {
         ctx->errorCount++;
-        pushToErrorStream(std::format("{}: Error W{}: {}", ctx->formatLocation(*location), warningNumber, msg), true);
+        pushToErrorStream(std::format("{}: Error W{}: {}", locationStr, warningNumber, msg), true);
       } else {
         ctx->warningCount++;
-        pushToErrorStream(std::format("{}: Warning W{}: {}", ctx->formatLocation(*location), warningNumber, msg));
+        pushToErrorStream(std::format("{}: Warning W{}: {}", locationStr, warningNumber, msg));
       }
     }
-  } else if (location != nullptr) {
-    pushToErrorStream(std::format("{}: {}: {}", ctx->formatLocation(*location), msgType, msg), forceAsError);
+  } else if (location != nullptr && ctx != nullptr) {
+    pushToErrorStream(std::format("{}: {}: {}", locationStr, msgType, msg), forceAsError);
   } else {
     pushToErrorStream(std::format("{}: {}", msgType, msg), forceAsError);
   }
