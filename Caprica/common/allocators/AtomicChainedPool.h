@@ -12,6 +12,9 @@ struct AtomicChainedPool final {
 
   char* allocate(size_t size);
 
+  // Reset the pool, freeing all allocations except the base heap
+  void reset();
+
 private:
   struct Heap final {
     size_t allocedHeapSize;

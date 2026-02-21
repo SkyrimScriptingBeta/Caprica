@@ -48,6 +48,9 @@ struct CapricaUserFlagsDefinition final {
   // the flag's index in the user flags vector.
   const UserFlag& getFlag(size_t flagNum) const;
 
+  // Clear all registered flags
+  void clear();
+
   CapricaUserFlagsDefinition() = default;
   CapricaUserFlagsDefinition(const CapricaUserFlagsDefinition&) = delete;
   ~CapricaUserFlagsDefinition() = default;

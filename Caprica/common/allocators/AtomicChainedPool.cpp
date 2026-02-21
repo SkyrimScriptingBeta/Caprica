@@ -58,6 +58,19 @@ Again:
   return (char*)ret;
 }
 
+void AtomicChainedPool::reset() {
+  // Delete all heaps except the base
+  auto next = base.next.load();
+  if (next) {
+    delete next;
+    base.next = nullptr;
+  }
+  // Reset base heap to full capacity
+  base.freeBytes = base.allocedHeapSize;
+  // Reset current to base
+  current = &base;
+}
+
 void* AtomicChainedPool::allocHeap(size_t newHeapSize, size_t firstAllocSize) {
   void* ret = nullptr;
   auto hp = new Heap(newHeapSize);

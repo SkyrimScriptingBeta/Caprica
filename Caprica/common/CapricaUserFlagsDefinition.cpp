@@ -51,4 +51,9 @@ const CapricaUserFlagsDefinition::UserFlag& CapricaUserFlagsDefinition::getFlag(
   return userFlags[flagNum];
 }
 
+void CapricaUserFlagsDefinition::clear() {
+  flagNameMap.clear();
+  userFlags.clear();
+}
+
 }

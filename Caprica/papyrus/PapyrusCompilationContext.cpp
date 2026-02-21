@@ -67,7 +67,7 @@ PapyrusCompilationNode::NodeType PapyrusCompilationNode::getType() const {
   return type;
 }
 
-allocators::AtomicChainedPool readAllocator { 1024 * 1024 * 4 };
+static allocators::AtomicChainedPool readAllocator { 1024 * 1024 * 4 };
 void PapyrusCompilationNode::FileReadJob::run() {
   if (parent->type == NodeType::PapyrusCompile || parent->type == NodeType::PasCompile ||
       parent->type == NodeType::PexDissassembly) {
@@ -407,6 +407,22 @@ struct PapyrusNamespace final {
       c.second->awaitCompile();
   }
 
+  void clear() {
+    // Recursively delete children
+    for (auto& c : children) {
+      c.second->clear();
+      delete c.second;
+    }
+    children.clear();
+    // Delete objects (compilation nodes)
+    for (auto& o : objects) {
+      delete o.second;
+    }
+    objects.clear();
+    name.clear();
+    parent = nullptr;
+  }
+
   void createNamespace(const identifier_ref& curPiece,
                        caseless_unordered_identifier_ref_map<PapyrusCompilationNode*>&& map) {
     if (conf::Papyrus::game == GameID::Skyrim && curPiece != "")
@@ -621,6 +637,20 @@ bool PapyrusCompilationContext::tryFindType(const identifier_ref& baseNamespace,
     curNamespace = curNamespace->parent;
   }
   return false;
+}
+
+void PapyrusCompilationContext::reset() {
+  // Clear nodes waiting for cleanup
+  for (auto* node : nodesToCleanUp) {
+    delete node;
+  }
+  nodesToCleanUp.clear();
+
+  // Clear the root namespace (recursively deletes all children and objects)
+  rootNamespace.clear();
+
+  // Reset the read allocator
+  readAllocator.reset();
 }
 
 }}

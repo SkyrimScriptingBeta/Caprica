@@ -168,4 +168,7 @@ namespace Warnings {
   extern std::unordered_set<size_t> warningsToEnable;
 }
 
+// Reset all configuration to default values
+void resetConfig();
+
 }}

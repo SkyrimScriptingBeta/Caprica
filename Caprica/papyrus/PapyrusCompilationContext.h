@@ -162,6 +162,9 @@ struct PapyrusCompilationContext final {
                           identifier_ref *retStructName);
 
   static void RenameImports(CapricaJobManager *jobManager);
+
+  // Reset all compilation state for a fresh compilation
+  static void reset();
 };
 
 }}
