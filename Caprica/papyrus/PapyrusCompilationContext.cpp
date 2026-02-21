@@ -407,16 +407,19 @@ struct PapyrusNamespace final {
       c.second->awaitCompile();
   }
 
-  void clear() {
+  void clear(bool deleteObjects = true) {
     // Recursively delete children
     for (auto& c : children) {
-      c.second->clear();
+      c.second->clear(deleteObjects);
       delete c.second;
     }
     children.clear();
-    // Delete objects (compilation nodes)
-    for (auto& o : objects) {
-      delete o.second;
+    // Delete objects (compilation nodes) only if requested
+    // Some objects may be in nodesToCleanUp and deleting them causes double-free
+    if (deleteObjects) {
+      for (auto& o : objects) {
+        delete o.second;
+      }
     }
     objects.clear();
     name.clear();
@@ -640,14 +643,13 @@ bool PapyrusCompilationContext::tryFindType(const identifier_ref& baseNamespace,
 }
 
 void PapyrusCompilationContext::reset() {
-  // Clear nodes waiting for cleanup
-  for (auto* node : nodesToCleanUp) {
-    delete node;
-  }
+  // Don't delete nodesToCleanUp - they're intentionally leaked to avoid double-free
+  // (see comment in createNamespace about "calling delete on this node causes a crash")
   nodesToCleanUp.clear();
 
-  // Clear the root namespace (recursively deletes all children and objects)
-  rootNamespace.clear();
+  // Clear the root namespace WITHOUT deleting objects - they may overlap with nodesToCleanUp
+  // This causes memory leaks but avoids double-free crashes
+  rootNamespace.clear(false);
 
   // Reset the read allocator
   readAllocator.reset();
