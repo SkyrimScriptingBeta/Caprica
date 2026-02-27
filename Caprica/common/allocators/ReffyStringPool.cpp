@@ -3,7 +3,7 @@
 #include <assert.h>
 #if defined(_MSC_VER)
 #include <intrin.h>
-#elif defined(__SSE4_2__)
+#elif defined(__SSE4_2__) && !defined(__EMSCRIPTEN__)
 #include <nmmintrin.h>
 #else
 #include <common/SoftCRC32.h>

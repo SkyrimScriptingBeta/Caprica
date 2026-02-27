@@ -2,7 +2,7 @@
 
 #if defined(_MSC_VER)
 #include <intrin.h>
-#elif defined(__SSE4_2__)
+#elif defined(__SSE4_2__) && !defined(__EMSCRIPTEN__)
 #include <emmintrin.h>
 #include <nmmintrin.h>
 #else

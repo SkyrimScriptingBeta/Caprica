@@ -10,7 +10,7 @@
 #include <common/CaselessStringComparer.h>
 #include <common/LargelyBufferedString.h>
 
-#if defined(_MSC_VER) || defined(__SSE4_2__)
+#if defined(_MSC_VER) || (defined(__SSE4_2__) && !defined(__EMSCRIPTEN__))
 #include <nmmintrin.h>
 #endif
 
@@ -477,7 +477,7 @@ StartOver:
         getChar();
       }
 
-#if defined(_MSC_VER) || defined(__SSE4_2__)
+#if defined(_MSC_VER) || (defined(__SSE4_2__) && !defined(__EMSCRIPTEN__))
       static const __m128i identifierChars = _mm_setr_epi8(
         'a', 'z', 'A', 'Z', '0', '9', '_', '_', ':', ':', '\0', 0, 0, 0, 0, 0
       );
