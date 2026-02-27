@@ -35,7 +35,7 @@ namespace("caprica", function()
 
         -- emscripten needs SSE emulation via WASM SIMD
         if is_plat("wasm") then
-            add_cxxflags("-msimd128", "-msse", "-msse2", "-msse4.2")
+            add_cxxflags("-msimd128", "-msse", "-msse2", "-msse4.2", {force = true})
         end
     end)
 end)
