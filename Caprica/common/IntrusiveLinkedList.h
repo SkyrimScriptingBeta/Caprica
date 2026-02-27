@@ -149,9 +149,6 @@ public:
       cur.other = otherFront;
     }
 
-  private:
-    friend LockstepIteratorWrapper<T2>;
-    friend ConstLockstepIteratorWrapper<T2>;
     struct {
       T* self { nullptr };
       T2* other { nullptr };
