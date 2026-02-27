@@ -28,7 +28,7 @@ namespace("caprica", function()
 
         -- add all header files
         add_includedirs("caprica", { public = true })
-        add_headerfiles("caprica/(**.h)")
+        add_headerfiles("(caprica/**.h)")
 
         -- add flags
         add_cxxflags("cl::/Zc:inline", "cl::/bigobj")
