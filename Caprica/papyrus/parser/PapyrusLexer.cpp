@@ -10,7 +10,9 @@
 #include <common/CaselessStringComparer.h>
 #include <common/LargelyBufferedString.h>
 
+#if defined(_MSC_VER) || defined(__SSE4_2__)
 #include <nmmintrin.h>
+#endif
 
 namespace caprica { namespace papyrus { namespace parser {
 
@@ -475,21 +477,25 @@ StartOver:
         getChar();
       }
 
+#if defined(_MSC_VER) || defined(__SSE4_2__)
       static const __m128i identifierChars = _mm_setr_epi8(
         'a', 'z', 'A', 'Z', '0', '9', '_', '_', ':', ':', '\0', 0, 0, 0, 0, 0
       );
 
       int idx = 0;
       do {
-        // Don't you just love SSE 4.2?
-        // This scans 16 characters at a
-        // time for the first one that
-        // isn't in the identifier set.
+        // SSE 4.2: scan 16 characters at a time for the first
+        // one that isn't in the identifier set.
         idx = _mm_cmpistri(identifierChars,
                            _mm_loadu_si128((__m128i*)strm),
                            _SIDD_UBYTE_OPS | _SIDD_CMP_RANGES | _SIDD_NEGATIVE_POLARITY | _SIDD_LEAST_SIGNIFICANT);
         advanceChars(idx);
       } while (idx == 16);
+#else
+      // Scalar fallback: scan one character at a time.
+      while (isAsciiAlphaNumeric(peekChar()) || peekChar() == '_' || peekChar() == ':')
+        getChar();
+#endif
 
       if (conf::Papyrus::allowDecompiledStructNameRefs && peekChar() == '#') {
         getChar();

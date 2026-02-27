@@ -1,10 +1,13 @@
 #include <common/CaselessStringComparer.h>
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 #include <intrin.h>
-#else
+#elif defined(__SSE4_2__)
 #include <emmintrin.h>
 #include <nmmintrin.h>
+#else
+#include <emmintrin.h>
+#include <common/SoftCRC32.h>
 #endif
 
 namespace caprica {

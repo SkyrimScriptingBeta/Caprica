@@ -1,10 +1,12 @@
 #include <common/allocators/ReffyStringPool.h>
 
 #include <assert.h>
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 #include <intrin.h>
-#else
+#elif defined(__SSE4_2__)
 #include <nmmintrin.h>
+#else
+#include <common/SoftCRC32.h>
 #endif
 
 namespace caprica { namespace allocators {
