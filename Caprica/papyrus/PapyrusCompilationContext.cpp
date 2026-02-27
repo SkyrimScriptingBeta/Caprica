@@ -3,6 +3,10 @@
 #ifdef _WIN32
 #include <fcntl.h>
 #include <io.h>
+#else
+#include <strings.h>
+#define strnicmp strncasecmp
+#define _strnicmp strncasecmp
 #endif
 #include <filesystem>
 #include <iostream>
