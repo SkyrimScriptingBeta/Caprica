@@ -12,6 +12,8 @@
 
 namespace caprica { namespace papyrus {
 
+struct PapyrusResolutionContext;
+
 enum class PapyrusValueType {
   Invalid = -1,
 
