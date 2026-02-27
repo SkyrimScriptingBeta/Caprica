@@ -78,7 +78,10 @@ size_t ReffyStringPool::hash(const identifier_ref& str) {
   } else if (lenLeft & 1) {
     val = _mm_crc32_u8(val, *(uint8_t*)(cStr + (iterCount * 4)));
   }
-  return ((size_t)val << 32) | val;
+  if constexpr (sizeof(size_t) > 4)
+    return ((size_t)val << 32) | val;
+  else
+    return val;
 }
 
 }}

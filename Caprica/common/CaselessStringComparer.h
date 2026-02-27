@@ -80,7 +80,10 @@ struct CaselessIdentifierHasher final {
 
   size_t operator()(const identifier_ref& k) const {
     uint32_t r = k.identifierHash();
-    return ((size_t)r << 32) | r;
+    if constexpr (sizeof(size_t) > 4)
+      return ((size_t)r << 32) | r;
+    else
+      return r;
   }
 };
 extern template uint32_t CaselessIdentifierHasher::hash<true>(const char*, size_t);

@@ -76,7 +76,7 @@ ALWAYS_INLINE bool CaselessIdentifierEqual::equal(const char* a, const char* b, 
   size_t lenLeft = len;
   if (isNullTerminated) {
     // We know the string is null-terminated, so we can align to 2.
-    lenLeft = ((len + 1) & 0xFFFFFFFFFFFFFFFEULL);
+    lenLeft = ((len + 1) & ~(size_t)1);
   }
   while (lenLeft >= 16) {
     auto vA = _mm_or_si128(_mm_loadu_si128((__m128i*)strA), spaces);
@@ -142,7 +142,7 @@ bool idEq(std::string_view a, std::string_view b) {
 NEVER_INLINE
 size_t CaselessStringHasher::doCaselessHash(const char* k, size_t len) {
   // Using FNV-1a hash, the same as the MSVC std lib hash of strings.
-  static_assert(sizeof(size_t) == 8, "This is 64-bit only!");
+  static_assert(sizeof(size_t) >= 4);
   constexpr size_t offsetBasis = 0xcbf29ce484222325ULL;
   constexpr size_t prime = 0x100000001B3ULL;
   const char* cStr = k;
@@ -177,7 +177,7 @@ ALWAYS_INLINE uint32_t CaselessIdentifierHasher::hash(const char* s, size_t len)
   size_t lenLeft = len;
   if (isNullTerminated) {
     // We know the string is null-terminated, so we can align to 2.
-    lenLeft = ((len + 1) & 0xFFFFFFFFFFFFFFFEULL);
+    lenLeft = ((len + 1) & ~(size_t)1);
   }
   size_t iterCount = lenLeft >> 2;
   uint32_t val = 0x84222325U;
@@ -205,13 +205,19 @@ template uint32_t CaselessIdentifierHasher::hash<false>(const char*, size_t);
 NEVER_INLINE
 size_t CaselessIdentifierHasher::operator()(const std::string& k) const {
   auto r = CaselessIdentifierHasher::hash<false>(k.c_str(), k.size());
-  return ((size_t)r << 32) | r;
+  if constexpr (sizeof(size_t) > 4)
+    return ((size_t)r << 32) | r;
+  else
+    return r;
 }
 
 NEVER_INLINE
 size_t CaselessIdentifierHasher::operator()(std::string_view k) const {
   auto r = CaselessIdentifierHasher::hash<false>(k.data(), k.size());
-  return ((size_t)r << 32) | r;
+  if constexpr (sizeof(size_t) > 4)
+    return ((size_t)r << 32) | r;
+  else
+    return r;
 }
 
 }
