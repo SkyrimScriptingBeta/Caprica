@@ -1,7 +1,9 @@
 #include <papyrus/PapyrusScript.h>
 
+#ifdef _WIN32
 #include <lmcons.h>
 #include <Windows.h>
+#endif
 
 #include <common/CapricaConfig.h>
 #include <common/EngineLimits.h>
@@ -19,6 +21,7 @@ pex::PexFile* PapyrusScript::buildPex(CapricaReportingContext& repCtx) const {
   pex->compilationTime = time(nullptr);
   pex->sourceFileName = pex->alloc->allocateString(sourceFileName);
 
+#ifdef _WIN32
   static std::string computerName = []() -> std::string {
     char compNameBuf[MAX_COMPUTERNAME_LENGTH + 1];
     DWORD compNameBufLength = sizeof(compNameBuf);
@@ -38,6 +41,10 @@ pex::PexFile* PapyrusScript::buildPex(CapricaReportingContext& repCtx) const {
     return std::string(userNameBuf, userNameBufLength);
   }();
   pex->userName = userName;
+#else
+  pex->computerName = "unknown";
+  pex->userName = "unknown";
+#endif
 
   for (auto o : objects)
     o->buildPex(repCtx, pex);
