@@ -1,5 +1,6 @@
 #include <pex/PexFunctionBuilder.h>
 
+#include <cstdio>
 #include <common/allocators/CachePool.h>
 #include <common/CapricaReportingContext.h>
 
@@ -84,7 +85,7 @@ PexLocalVariable* PexFunctionBuilder::internalAllocateTempVar(const PexString& t
     CapricaReportingContext::logicalFatal("Exceeded the maximum number of temp vars possible in a function!");
   if (currentTempI > std::numeric_limits<int>::max())
     CapricaReportingContext::logicalFatal("Exceeded the maximum number of temp vars possible in a function!");
-  if (_itoa_s((int)currentTempI, buf + PrefixLength, sizeof(buf) - PrefixLength, 10) != 0)
+  if (snprintf(buf + PrefixLength, sizeof(buf) - PrefixLength, "%d", (int)currentTempI) < 0)
     CapricaReportingContext::logicalFatal("Failed to convert the current temp var index to a string!");
   currentTempI++;
 
