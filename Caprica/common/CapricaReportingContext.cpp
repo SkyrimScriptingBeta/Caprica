@@ -6,7 +6,9 @@
 
 #include <common/CapricaConfig.h>
 
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 
 namespace caprica {
 
@@ -18,8 +20,10 @@ void CapricaReportingContext::pushToErrorStream(std::string&& msg, bool isError)
 }
 
 void CapricaReportingContext::breakIfDebugging() {
+#ifdef _WIN32
   if (IsDebuggerPresent())
     __debugbreak();
+#endif
 }
 
 void CapricaReportingContext::exitIfErrors() {
