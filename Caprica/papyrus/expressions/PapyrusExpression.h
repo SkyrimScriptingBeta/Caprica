@@ -19,7 +19,7 @@ struct PapyrusMemberAccessExpression;
 struct PapyrusParentExpression;
 struct PapyrusCastExpression;
 
-struct PapyrusExpression abstract {
+struct PapyrusExpression {
   const CapricaFileLocation location;
 
   explicit PapyrusExpression(CapricaFileLocation loc) : location(loc) { }

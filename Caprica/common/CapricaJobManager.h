@@ -9,7 +9,7 @@
 
 namespace caprica {
 
-struct CapricaJob abstract {
+struct CapricaJob {
   CapricaJob() = default;
   CapricaJob(const CapricaJob& other) = delete;
   CapricaJob(CapricaJob&& other) = delete;

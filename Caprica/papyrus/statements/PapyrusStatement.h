@@ -13,7 +13,7 @@
 
 namespace caprica { namespace papyrus { namespace statements {
 
-struct PapyrusStatement abstract {
+struct PapyrusStatement {
   const CapricaFileLocation location;
 
   explicit PapyrusStatement(CapricaFileLocation loc) : location(loc) { }
