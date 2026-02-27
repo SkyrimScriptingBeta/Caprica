@@ -1,8 +1,10 @@
 #include <papyrus/PapyrusCompilationContext.h>
 
+#ifdef _WIN32
 #include <fcntl.h>
-#include <filesystem>
 #include <io.h>
+#endif
+#include <filesystem>
 #include <iostream>
 
 #include <common/allocators/AtomicChainedPool.h>
@@ -80,6 +82,7 @@ void PapyrusCompilationNode::FileReadJob::run() {
     parent->readFileData = parent->ownedReadFileData;
     return;
   }
+#ifdef _WIN32
   if (parent->filesize < std::numeric_limits<uint32_t>::max()) {
     auto buf = readAllocator.allocate(parent->filesize + 1);
     auto fd = _open(parent->sourceFilePath.c_str(), _O_BINARY | _O_RDONLY | _O_SEQUENTIAL);
@@ -95,6 +98,7 @@ void PapyrusCompilationNode::FileReadJob::run() {
       _close(fd);
     }
   }
+#endif
   {
     std::string str;
     str.resize(parent->filesize);
