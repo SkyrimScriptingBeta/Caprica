@@ -32,5 +32,10 @@ namespace("caprica", function()
 
         -- add flags
         add_cxxflags("cl::/Zc:inline", "cl::/bigobj")
+
+        -- emscripten needs SSE emulation via WASM SIMD
+        if is_plat("wasm") then
+            add_cxxflags("-msimd128", "-msse", "-msse2", "-msse4.2")
+        end
     end)
 end)

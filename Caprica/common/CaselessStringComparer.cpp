@@ -1,6 +1,11 @@
 #include <common/CaselessStringComparer.h>
 
+#ifdef _MSC_VER
 #include <intrin.h>
+#else
+#include <emmintrin.h>
+#include <nmmintrin.h>
+#endif
 
 namespace caprica {
 
@@ -57,8 +62,7 @@ bool pathEq(const identifier_ref& a, const identifier_ref& b) {
   return caselessEq(std::string_view(a.data(), a.size()), std::string_view(b.data(), b.size()));
 }
 
-alignas(128) static const __m128i spaces { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                                           ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
+alignas(128) static const __m128i spaces = _mm_set1_epi8(' ');
 
 template <bool isNullTerminated>
 ALWAYS_INLINE bool CaselessIdentifierEqual::equal(const char* a, const char* b, size_t len) {

@@ -475,9 +475,9 @@ StartOver:
         getChar();
       }
 
-      static const __m128i identifierChars = {
-        'a', 'z', 'A', 'Z', '0', '9', '_', '_', ':', ':', '\0',
-      };
+      static const __m128i identifierChars = _mm_setr_epi8(
+        'a', 'z', 'A', 'Z', '0', '9', '_', '_', ':', ':', '\0', 0, 0, 0, 0, 0
+      );
 
       int idx = 0;
       do {
