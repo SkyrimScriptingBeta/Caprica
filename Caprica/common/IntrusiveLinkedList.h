@@ -50,14 +50,13 @@ struct IntrusiveLinkedList final {
 
   size_t size() const { return mSize; }
 
-private:
-  // These access T::next from IntrusiveLinkedList<T> scope (which is friended).
-  // Their address is taken in begin()/end() methods (also in this scope),
-  // so instantiation happens here — not in nested iterator types where
-  // Clang would reject the access.
+  // Accessor for T::next — public so cross-specialization lockstep
+  // iteration (IntrusiveLinkedList<A> iterating with IntrusiveLinkedList<B>)
+  // can take the address of the other specialization's nextOf.
   static T* nextOf(T* node) { return node->next; }
   static const T* nextOf(const T* node) { return node->next; }
 
+private:
   size_t mSize { 0 };
   T* mFront { nullptr };
   T* mBack { nullptr };
