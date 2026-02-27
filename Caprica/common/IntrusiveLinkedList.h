@@ -50,6 +50,11 @@ struct IntrusiveLinkedList final {
 
   size_t size() const { return mSize; }
 
+  // Accessor for 'next' pointer — IntrusiveLinkedList<T> is friended by element types,
+  // but nested iterators are not. This static method bridges the access.
+  static T* getNext(T* node) { return node->next; }
+  static const T* getNext(const T* node) { return node->next; }
+
 private:
   size_t mSize { 0 };
   T* mFront { nullptr };
@@ -62,7 +67,7 @@ private:
       if (cur == nullptr)
         return *this;
       index++;
-      cur = cur->next;
+      cur = IntrusiveLinkedList::getNext(cur);
       return *this;
     }
 
@@ -90,7 +95,7 @@ private:
       if (cur == nullptr)
         return *this;
       index++;
-      cur = cur->next;
+      cur = IntrusiveLinkedList::getNext(cur);
       return *this;
     }
 
@@ -127,8 +132,8 @@ public:
       index++;
       cur.prevSelf = cur.self;
       cur.prevOther = cur.other;
-      cur.self = cur.self->next;
-      cur.other = cur.other->next;
+      cur.self = IntrusiveLinkedList::getNext(cur.self);
+      cur.other = IntrusiveLinkedList<T2>::getNext(cur.other);
       return *this;
     }
 
@@ -201,7 +206,7 @@ private:
       if (cur == nullptr)
         return *this;
       prev = cur;
-      cur = cur->next;
+      cur = IntrusiveLinkedList::getNext(cur);
       return *this;
     }
 
