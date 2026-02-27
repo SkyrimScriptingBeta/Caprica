@@ -51,18 +51,26 @@ struct IntrusiveLinkedList final {
   size_t size() const { return mSize; }
 
 private:
+  // These access T::next from IntrusiveLinkedList<T> scope (which is friended).
+  // Their address is taken in begin()/end() methods (also in this scope),
+  // so instantiation happens here — not in nested iterator types where
+  // Clang would reject the access.
+  static T* nextOf(T* node) { return node->next; }
+  static const T* nextOf(const T* node) { return node->next; }
+
   size_t mSize { 0 };
   T* mFront { nullptr };
   T* mBack { nullptr };
 
   struct ConstIterator final {
+    using NextFn = const T* (*)(const T*);
     size_t index { 0 };
 
     ConstIterator& operator++() {
       if (cur == nullptr)
         return *this;
       index++;
-      cur = cur->next;
+      cur = nextFn(cur);
       return *this;
     }
 
@@ -78,19 +86,21 @@ private:
   private:
     friend IntrusiveLinkedList;
     const T* cur { nullptr };
+    NextFn nextFn { nullptr };
 
     ConstIterator() = default;
-    ConstIterator(const T* mFront) : cur(mFront) { }
+    ConstIterator(const T* front, NextFn fn) : cur(front), nextFn(fn) { }
   };
 
   struct Iterator final {
+    using NextFn = T* (*)(T*);
     size_t index { 0 };
 
     Iterator& operator++() {
       if (cur == nullptr)
         return *this;
       index++;
-      cur = cur->next;
+      cur = nextFn(cur);
       return *this;
     }
 
@@ -106,9 +116,10 @@ private:
   private:
     friend IntrusiveLinkedList;
     T* cur { nullptr };
+    NextFn nextFn { nullptr };
 
     Iterator() = default;
-    Iterator(T* mFront) : cur(mFront) { }
+    Iterator(T* front, NextFn fn) : cur(front), nextFn(fn) { }
   };
 
   template <typename T2>
@@ -119,6 +130,8 @@ private:
 public:
   template <typename T2>
   struct LockstepIterator final {
+    using SelfNextFn = T* (*)(T*);
+    using OtherNextFn = T2* (*)(T2*);
     size_t index { 0 };
 
     LockstepIterator& operator++() {
@@ -127,8 +140,8 @@ public:
       index++;
       cur.prevSelf = cur.self;
       cur.prevOther = cur.other;
-      cur.self = cur.self->next;
-      cur.other = cur.other->next;
+      cur.self = selfNextFn(cur.self);
+      cur.other = otherNextFn(cur.other);
       return *this;
     }
 
@@ -144,7 +157,8 @@ public:
     bool operator!=(const LockstepIterator& other) const { return !(*this == other); }
 
     LockstepIterator() = default;
-    LockstepIterator(T* selfFront, T2* otherFront) {
+    LockstepIterator(T* selfFront, T2* otherFront, SelfNextFn sFn, OtherNextFn oFn)
+        : selfNextFn(sFn), otherNextFn(oFn) {
       cur.self = selfFront;
       cur.other = otherFront;
     }
@@ -155,6 +169,10 @@ public:
       T* prevSelf { nullptr };
       T2* prevOther { nullptr };
     } cur {};
+
+  private:
+    SelfNextFn selfNextFn { nullptr };
+    OtherNextFn otherNextFn { nullptr };
   };
 
 private:
@@ -163,7 +181,9 @@ private:
     LockstepIterator<T2> begin() {
       if (!self.size())
         return LockstepIterator<T2>();
-      return LockstepIterator<T2>(self.mFront, other.mFront);
+      return LockstepIterator<T2>(self.mFront, other.mFront,
+                                  &IntrusiveLinkedList::nextOf,
+                                  &IntrusiveLinkedList<T2>::nextOf);
     }
 
     LockstepIterator<T2> end() { return LockstepIterator<T2>(); }
@@ -182,7 +202,9 @@ private:
     LockstepIterator<const T2> begin() {
       if (!self.size())
         return LockstepIterator<const T2>();
-      return LockstepIterator<const T2>(self.front(), other.front());
+      return LockstepIterator<const T2>(self.front(), other.front(),
+                                        &IntrusiveLinkedList::nextOf,
+                                        &IntrusiveLinkedList<T2>::nextOf);
     }
 
     LockstepIterator<const T2> end() { return LockstepIterator<const T2>(); }
@@ -197,11 +219,13 @@ private:
   };
 
   struct InsertableIterator final {
+    using NextFn = T* (*)(T*);
+
     InsertableIterator& operator++() {
       if (cur == nullptr)
         return *this;
       prev = cur;
-      cur = cur->next;
+      cur = nextFn(cur);
       return *this;
     }
 
@@ -218,16 +242,17 @@ private:
     friend IntrusiveLinkedList;
     T* cur { nullptr };
     T* prev { nullptr };
+    NextFn nextFn { nullptr };
 
     InsertableIterator() = default;
-    InsertableIterator(T* curFront) : cur(curFront) { }
+    InsertableIterator(T* curFront, NextFn fn) : cur(curFront), nextFn(fn) { }
   };
 
 public:
   ConstIterator begin() const {
     if (!mSize)
       return ConstIterator();
-    return ConstIterator(mFront);
+    return ConstIterator(mFront, &IntrusiveLinkedList::nextOf);
   }
 
   ConstIterator end() const { return ConstIterator(); }
@@ -235,7 +260,7 @@ public:
   Iterator begin() {
     if (!mSize)
       return Iterator();
-    return Iterator(mFront);
+    return Iterator(mFront, &IntrusiveLinkedList::nextOf);
   }
 
   Iterator end() { return Iterator(); }
@@ -253,7 +278,7 @@ public:
   InsertableIterator beginInsertable() {
     if (!mSize)
       return InsertableIterator();
-    return InsertableIterator(mFront);
+    return InsertableIterator(mFront, &IntrusiveLinkedList::nextOf);
   }
 
   InsertableIterator endInsertable() { return InsertableIterator(); }
