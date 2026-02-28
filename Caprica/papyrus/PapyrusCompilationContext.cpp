@@ -122,7 +122,12 @@ void PapyrusCompilationNode::FileReadJob::run() {
     }
     str += '\0';
     parent->ownedReadFileData = std::move(str);
-    parent->readFileData = parent->ownedReadFileData;
+    // Exclude the null terminator from the view — the lexer uses
+    // string_view::size() to bound its reads.  The Windows path
+    // (above) already does this correctly by setting the view size
+    // to the read length, not filesize+1.
+    parent->readFileData = std::string_view(parent->ownedReadFileData.data(),
+                                            parent->ownedReadFileData.size() - 1);
   }
 }
 
