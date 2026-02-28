@@ -8,83 +8,83 @@ namespace caprica { namespace conf {
 // default values set in the command line parsing.
 
 namespace General {
-  bool compileInParallel{ false };
-  bool quietCompile{ false };
-  bool recursive { false };
-  std::filesystem::path outputDirectory;
-  bool anonymizeOutput;
-  std::vector<std::shared_ptr<IInputFile>> inputFiles;
+  thread_local bool compileInParallel{ false };
+  thread_local bool quietCompile{ false };
+  thread_local bool recursive { false };
+  thread_local std::filesystem::path outputDirectory;
+  thread_local bool anonymizeOutput;
+  thread_local std::vector<std::shared_ptr<IInputFile>> inputFiles;
   }
 
   namespace PCompiler {
   // pCompiler compatibility mode.
-  bool pCompilerCompatibilityMode{false};
-  bool all{false};
-  bool norecurse{false};
+  thread_local bool pCompilerCompatibilityMode{false};
+  thread_local bool all{false};
+  thread_local bool norecurse{false};
 }
 
 namespace CodeGeneration {
-  bool disableBetaCode{ false };
-  bool disableDebugCode{ false };
-  bool enableCKOptimizations{ false };
-  bool enableOptimizations{ false };
-  bool emitDebugInfo{ false };
+  thread_local bool disableBetaCode{ false };
+  thread_local bool disableDebugCode{ false };
+  thread_local bool enableCKOptimizations{ false };
+  thread_local bool enableOptimizations{ false };
+  thread_local bool emitDebugInfo{ false };
 }
 
 namespace Debug {
-  bool debugControlFlowGraph{ false };
-  bool dumpPexAsm{ false };
+  thread_local bool debugControlFlowGraph{ false };
+  thread_local bool dumpPexAsm{ false };
 }
 
 namespace EngineLimits {
-  bool ignoreLimits{ false };
-  size_t maxArrayLength{ 0 };
-  size_t maxFunctionsInEmptyStatePerObject{ 0 };
-  size_t maxFunctionsPerState{ 0 };
-  size_t maxGuardsPerObject{ 0 };
-  size_t maxInitialValuesPerObject{ 0 };
-  size_t maxNamedStatesPerObject{ 0 };
-  size_t maxParametersPerFunction{ 0 };
-  size_t maxPropertiesPerObject{ 0 };
-  size_t maxStaticFunctionsPerObject{ 0 };
-  size_t maxUserFlags{ 0 };
-  size_t maxVariablesPerObject{ 0 };
+  thread_local bool ignoreLimits{ false };
+  thread_local size_t maxArrayLength{ 0 };
+  thread_local size_t maxFunctionsInEmptyStatePerObject{ 0 };
+  thread_local size_t maxFunctionsPerState{ 0 };
+  thread_local size_t maxGuardsPerObject{ 0 };
+  thread_local size_t maxInitialValuesPerObject{ 0 };
+  thread_local size_t maxNamedStatesPerObject{ 0 };
+  thread_local size_t maxParametersPerFunction{ 0 };
+  thread_local size_t maxPropertiesPerObject{ 0 };
+  thread_local size_t maxStaticFunctionsPerObject{ 0 };
+  thread_local size_t maxUserFlags{ 0 };
+  thread_local size_t maxVariablesPerObject{ 0 };
 }
 
 namespace Papyrus {
-GameID game { GameID::UNKNOWN };
-  bool allowCompilerIdentifiers { false };
-  bool allowDecompiledStructNameRefs{ false };
-  bool allowNegativeLiteralAsBinaryOp{ false };
-  bool enableLanguageExtensions{ false };
-  bool ignorePropertyNameLocalConflicts{ false };
-  bool allowImplicitNoneCastsToAnyType{ false };
-  std::vector<ImportDir> importDirectories {};
-  CapricaUserFlagsDefinition userFlagsDefinition{};
+thread_local GameID game { GameID::UNKNOWN };
+  thread_local bool allowCompilerIdentifiers { false };
+  thread_local bool allowDecompiledStructNameRefs{ false };
+  thread_local bool allowNegativeLiteralAsBinaryOp{ false };
+  thread_local bool enableLanguageExtensions{ false };
+  thread_local bool ignorePropertyNameLocalConflicts{ false };
+  thread_local bool allowImplicitNoneCastsToAnyType{ false };
+  thread_local std::vector<ImportDir> importDirectories {};
+  thread_local CapricaUserFlagsDefinition userFlagsDefinition{};
 }
 
 namespace Skyrim {
-  bool skyrimAllowUnknownEventsOnNonNativeClass{ true };
-  bool skyrimAllowObjectVariableShadowingParentProperty{ true };
-  bool skyrimAllowLocalVariableShadowingParentProperty{ true };
-  bool skyrimAllowLocalUseBeforeDeclaration{ true };
-  bool skyrimAllowAssigningVoidMethodCallResult{ true };
+  thread_local bool skyrimAllowUnknownEventsOnNonNativeClass{ true };
+  thread_local bool skyrimAllowObjectVariableShadowingParentProperty{ true };
+  thread_local bool skyrimAllowLocalVariableShadowingParentProperty{ true };
+  thread_local bool skyrimAllowLocalUseBeforeDeclaration{ true };
+  thread_local bool skyrimAllowAssigningVoidMethodCallResult{ true };
 }
 
 namespace Performance {
-  bool asyncFileRead{ false };
-  bool asyncFileWrite{ false };
-  bool dumpTiming{ false };
-  bool performanceTestMode{ false };
-  bool resolveSymlinks{ false };
+  thread_local bool asyncFileRead{ false };
+  thread_local bool asyncFileWrite{ false };
+  thread_local bool dumpTiming{ false };
+  thread_local bool performanceTestMode{ false };
+  thread_local bool resolveSymlinks{ false };
 }
 
 namespace Warnings {
-  bool disableAllWarnings{ false };
-  bool treatWarningsAsErrors{ false };
-  std::unordered_set<size_t> warningsToHandleAsErrors{ };
-  std::unordered_set<size_t> warningsToIgnore{ };
-  std::unordered_set<size_t> warningsToEnable{ };
+  thread_local bool disableAllWarnings{ false };
+  thread_local bool treatWarningsAsErrors{ false };
+  thread_local std::unordered_set<size_t> warningsToHandleAsErrors{ };
+  thread_local std::unordered_set<size_t> warningsToIgnore{ };
+  thread_local std::unordered_set<size_t> warningsToEnable{ };
 }
 
 void resetConfig() {

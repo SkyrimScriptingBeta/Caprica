@@ -73,7 +73,7 @@ PapyrusCompilationNode::NodeType PapyrusCompilationNode::getType() const {
   return type;
 }
 
-static allocators::AtomicChainedPool readAllocator { 1024 * 1024 * 4 };
+static thread_local allocators::AtomicChainedPool readAllocator { 1024 * 1024 * 4 };
 void PapyrusCompilationNode::FileReadJob::run() {
   if (parent->type == NodeType::PapyrusCompile || parent->type == NodeType::PasCompile ||
       parent->type == NodeType::PexDissassembly) {
@@ -370,7 +370,7 @@ void PapyrusCompilationNode::FileWriteJob::run() {
 }
 
 namespace {
-static std::vector<PapyrusCompilationNode*> nodesToCleanUp {};
+static thread_local std::vector<PapyrusCompilationNode*> nodesToCleanUp {};
 struct PapyrusNamespace final {
   std::string name { "" };
   PapyrusNamespace* parent { nullptr };
@@ -571,7 +571,7 @@ struct PapyrusNamespace final {
 };
 }
 
-static PapyrusNamespace rootNamespace {};
+static thread_local PapyrusNamespace rootNamespace {};
 void PapyrusCompilationContext::pushNamespaceFullContents(
     const std::string& namespaceName, caseless_unordered_identifier_ref_map<PapyrusCompilationNode*>&& map) {
   rootNamespace.createNamespace(namespaceName, std::move(map));

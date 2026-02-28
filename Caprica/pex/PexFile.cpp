@@ -8,7 +8,7 @@
 
 namespace caprica { namespace pex {
 
-static allocators::AtomicCachePool<allocators::ReffyStringPool> stringPoolAllocator;
+static thread_local allocators::AtomicCachePool<allocators::ReffyStringPool> stringPoolAllocator;
 PexFile::PexFile(allocators::ChainedPool* p) {
   alloc = p;
   stringTable = stringPoolAllocator.acquire();

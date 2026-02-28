@@ -18,13 +18,13 @@ private:
   // using counter_type = NopIncStruct;
 
 public:
-  static NopIncStruct peekedTokenCount;
-  static NopIncStruct consumedTokenCount;
-  static counter_type importedFileCount;
-  static counter_type inputFileCount;
-  static NopIncStruct lexedFilesCount;
-  static NopIncStruct allocatedHeapCount;
-  static NopIncStruct freedHeapCount;
+  static thread_local NopIncStruct peekedTokenCount;
+  static thread_local NopIncStruct consumedTokenCount;
+  static thread_local counter_type importedFileCount;
+  static thread_local counter_type inputFileCount;
+  static thread_local NopIncStruct lexedFilesCount;
+  static thread_local NopIncStruct allocatedHeapCount;
+  static thread_local NopIncStruct freedHeapCount;
 
   static void outputStats();
   static void outputImportedCount();

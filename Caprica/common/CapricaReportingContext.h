@@ -106,7 +106,7 @@ struct CapricaReportingContext final {
     warning(location, num, msg, arg1Name, arg2Name, arg3Name);                                      \
   }
 #define DEFINE_WARNING_ONCE_A0(num, id, msg)                                           \
-  static inline bool m_Warn_##num##_##id_emitted { false };                            \
+  static inline thread_local bool m_Warn_##num##_##id_emitted { false };                            \
   NEVER_INLINE void warning_W##num##_##id(CapricaFileLocation location) {              \
     if (!m_Warn_##num##_##id_emitted) {                                                \
       warning(location, num, msg "\n\tFurther {} warnings will be suppressed.", num); \
@@ -114,7 +114,7 @@ struct CapricaReportingContext final {
     }                                                                                  \
   }
 #define DEFINE_WARNING_ONCE_A1(num, id, msg, arg1Type, arg1Name)                                 \
-  static inline bool m_Warn_##num##_##id_emitted { false };                                      \
+  static inline thread_local bool m_Warn_##num##_##id_emitted { false };                                      \
   NEVER_INLINE void warning_W##num##_##id(CapricaFileLocation location, arg1Type arg1Name) {     \
     if (!m_Warn_##num##_##id_emitted) {                                                          \
       warning(location, num, msg "\n\tFurther {} warnings will be suppressed.", arg1Name, num); \
@@ -122,7 +122,7 @@ struct CapricaReportingContext final {
     }                                                                                            \
   }
 #define DEFINE_WARNING_ONCE_A2(num, id, msg, arg1Type, arg1Name, arg2Type, arg2Name)                            \
-  static inline bool m_Warn_##num##_##id_emitted { false };                                                     \
+  static inline thread_local bool m_Warn_##num##_##id_emitted { false };                                                     \
   NEVER_INLINE void warning_W##num##_##id(CapricaFileLocation location, arg1Type arg1Name, arg2Type arg2Name) { \
     if (!m_Warn_##num##_##id_emitted) {                                                                         \
       warning(location, num, msg "\n\tFurther {} warnings will be suppressed.", arg1Name, arg2Name, num);      \

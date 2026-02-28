@@ -5,13 +5,13 @@
 
 namespace caprica {
 
-CapricaStats::NopIncStruct CapricaStats::peekedTokenCount { 0 };
-CapricaStats::NopIncStruct CapricaStats::consumedTokenCount { 0 };
-CapricaStats::NopIncStruct CapricaStats::lexedFilesCount { 0 };
-CapricaStats::counter_type CapricaStats::importedFileCount { 0 };
-CapricaStats::counter_type CapricaStats::inputFileCount { 0 };
-CapricaStats::NopIncStruct CapricaStats::allocatedHeapCount { 0 };
-CapricaStats::NopIncStruct CapricaStats::freedHeapCount { 0 };
+thread_local CapricaStats::NopIncStruct CapricaStats::peekedTokenCount { 0 };
+thread_local CapricaStats::NopIncStruct CapricaStats::consumedTokenCount { 0 };
+thread_local CapricaStats::NopIncStruct CapricaStats::lexedFilesCount { 0 };
+thread_local CapricaStats::counter_type CapricaStats::importedFileCount { 0 };
+thread_local CapricaStats::counter_type CapricaStats::inputFileCount { 0 };
+thread_local CapricaStats::NopIncStruct CapricaStats::allocatedHeapCount { 0 };
+thread_local CapricaStats::NopIncStruct CapricaStats::freedHeapCount { 0 };
 
 template <typename CounterType, typename NopType>
 static std::enable_if_t<!std::is_same<CounterType, NopType>::value> internalOutputStats() {
