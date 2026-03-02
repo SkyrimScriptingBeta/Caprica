@@ -11,6 +11,12 @@ set_version("0.3.0")
 add_requires("boost", { configs = { filesystem = true, program_options = true, container = true } })
 add_requires("pugixml")
 
+option("tests", { default = false, description = "Build tests" })
+
+if has_config("tests") then
+    add_requires("catch2")
+end
+
 namespace("caprica", function()
     -- define targets
     target("caprica", function()
@@ -39,3 +45,14 @@ namespace("caprica", function()
         end
     end)
 end)
+
+if has_config("tests") then
+    target("caprica_tests", function()
+        set_kind("binary")
+        set_default(false)
+        set_group("test")
+        add_deps("caprica::caprica")
+        add_packages("catch2")
+        add_files("tests/**.cpp")
+    end)
+end
