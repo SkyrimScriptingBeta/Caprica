@@ -73,12 +73,42 @@ PapyrusCompilationNode::NodeType PapyrusCompilationNode::getType() const {
   return type;
 }
 
+PapyrusCompilationNode* PapyrusCompilationNode::createFromSource(
+    CapricaJobManager* mgr,
+    NodeType type,
+    const std::string& scriptName,
+    std::string source) {
+  // Ensure the sourceFilePath has a .psc extension so that
+  // FilePreParseJob and FileParseJob recognize it as Papyrus source.
+  std::string filePath = scriptName;
+  if (filePath.size() < 4 || filePath.substr(filePath.size() - 4) != ".psc")
+    filePath += ".psc";
+
+  auto node = new PapyrusCompilationNode(
+      mgr, type,
+      std::string(filePath),   // reportedName
+      std::string(""),         // baseOutputDir
+      std::string(filePath),   // sourceFilePath
+      0,                       // lastModTime
+      source.size(),           // fileSize
+      false                    // strictNS
+  );
+  node->ownedReadFileData = std::move(source);
+  node->readFileData = node->ownedReadFileData;
+  node->sourceProvided = true;
+  return node;
+}
+
 static thread_local allocators::AtomicChainedPool readAllocator { 1024 * 1024 * 4 };
 void PapyrusCompilationNode::FileReadJob::run() {
   if (parent->type == NodeType::PapyrusCompile || parent->type == NodeType::PasCompile ||
       parent->type == NodeType::PexDissassembly) {
     if (!conf::General::quietCompile)
       std::cout << "Compiling " + parent->reportedName + "\n";
+  }
+  // Source already provided in memory — nothing to read.
+  if (parent->sourceProvided) {
+    return;
   }
   // TODO: remove this hack when imports are working
   if (parent->sourceFilePath.starts_with("fake://")) {
@@ -342,6 +372,16 @@ void PapyrusCompilationNode::FileWriteJob::run() {
   switch (parent->type) {
     case NodeType::PasCompile:
     case NodeType::PapyrusCompile: {
+      if (parent->outputToMemory) {
+        parent->pexWriter->applyToBuffers([&](const char* data, size_t size) {
+          parent->capturedOutput.insert(parent->capturedOutput.end(),
+                                        reinterpret_cast<const uint8_t*>(data),
+                                        reinterpret_cast<const uint8_t*>(data) + size);
+        });
+        delete parent->pexWriter;
+        parent->pexWriter = nullptr;
+        return;
+      }
       if (!conf::Performance::performanceTestMode) {
         auto baseFileName = std::string(FSUtils::basenameAsRef(parent->sourceFilePath));
         auto containingDir = std::filesystem::path(parent->outputDirectory);

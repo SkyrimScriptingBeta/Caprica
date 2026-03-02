@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
+#include <vector>
 
 #include <common/CapricaJobManager.h>
 #include <common/CaselessStringComparer.h>
@@ -26,6 +28,18 @@ struct PapyrusCompilationNode final {
   };
 
   std::string_view baseName;
+
+  // When true, FileWriteJob captures .pex output to capturedOutput instead of writing to disk.
+  bool outputToMemory = false;
+  // Populated by FileWriteJob when outputToMemory is true.
+  std::vector<uint8_t> capturedOutput;
+
+  // Create a node with source already in memory. FileReadJob will be a no-op.
+  static PapyrusCompilationNode* createFromSource(
+      CapricaJobManager* mgr,
+      NodeType type,
+      const std::string& scriptName,
+      std::string source);
 
   PapyrusCompilationNode() = delete;
   PapyrusCompilationNode(CapricaJobManager* mgr,
@@ -94,6 +108,7 @@ private:
   };
 
   NodeType type;
+  bool sourceProvided = false;
   size_t filesize;
   time_t lastModTime;
   std::string reportedName;
