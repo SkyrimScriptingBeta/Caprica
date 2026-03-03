@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -177,6 +179,13 @@ struct PapyrusCompilationContext final {
                           identifier_ref *retStructName);
 
   static void RenameImports(CapricaJobManager *jobManager);
+
+  // Set/clear a lazy script provider for on-demand import resolution.
+  // When tryFindType() fails to find a script in the namespace, it calls the provider.
+  static void setScriptProvider(
+      std::function<std::optional<std::string>(const std::string&)> provider,
+      CapricaJobManager* jobMgr);
+  static void clearScriptProvider();
 
   // Reset all compilation state for a fresh compilation
   static void reset();

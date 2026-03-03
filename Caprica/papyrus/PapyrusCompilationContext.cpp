@@ -612,6 +612,23 @@ struct PapyrusNamespace final {
 }
 
 static thread_local PapyrusNamespace rootNamespace {};
+static thread_local std::function<std::optional<std::string>(const std::string&)> scriptProvider {};
+static thread_local CapricaJobManager* providerJobManager { nullptr };
+static thread_local caseless_unordered_identifier_set currentlyResolving {};
+
+void PapyrusCompilationContext::setScriptProvider(
+    std::function<std::optional<std::string>(const std::string&)> provider,
+    CapricaJobManager* jobMgr) {
+  scriptProvider = std::move(provider);
+  providerJobManager = jobMgr;
+}
+
+void PapyrusCompilationContext::clearScriptProvider() {
+  scriptProvider = nullptr;
+  providerJobManager = nullptr;
+  currentlyResolving.clear();
+}
+
 void PapyrusCompilationContext::pushNamespaceFullContents(
     const std::string& namespaceName, caseless_unordered_identifier_ref_map<PapyrusCompilationNode*>&& map) {
   rootNamespace.createNamespace(namespaceName, std::move(map));
@@ -692,6 +709,39 @@ bool PapyrusCompilationContext::tryFindType(const identifier_ref& baseNamespace,
       return true;
     curNamespace = curNamespace->parent;
   }
+
+  // Lazy import: ask the ScriptProvider before giving up.
+  if (scriptProvider && providerJobManager) {
+    auto name = typeName.to_string();
+
+    // Circular dependency guard
+    if (currentlyResolving.contains(name))
+      return false;
+    currentlyResolving.insert(name);
+
+    auto source = scriptProvider(name);
+    if (source) {
+      auto node = PapyrusCompilationNode::createFromSource(
+          providerJobManager, PapyrusCompilationNode::NodeType::PapyrusImport,
+          name, std::move(*source));
+
+      // Register in the root namespace so it's found next time.
+      caseless_unordered_identifier_ref_map<PapyrusCompilationNode*> map;
+      map.emplace(identifier_ref(node->baseName), node);
+      rootNamespace.createNamespace("", std::move(map));
+
+      // Run the pipeline synchronously up to preSemantic.
+      // Each await chains through predecessors via tryRun() on the current thread.
+      // With sourceProvided=true, the read job returns immediately.
+      node->awaitPreSemantic();
+
+      *retNode = node;
+      currentlyResolving.erase(name);
+      return true;
+    }
+    currentlyResolving.erase(name);
+  }
+
   return false;
 }
 
@@ -703,6 +753,11 @@ void PapyrusCompilationContext::reset() {
   // Clear the root namespace WITHOUT deleting objects - they may overlap with nodesToCleanUp
   // This causes memory leaks but avoids double-free crashes
   rootNamespace.clear(false);
+
+  // Clear lazy import state
+  scriptProvider = nullptr;
+  providerJobManager = nullptr;
+  currentlyResolving.clear();
 
   // Reset the read allocator
   readAllocator.reset();
