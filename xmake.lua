@@ -40,8 +40,10 @@ namespace("caprica", function()
         add_cxxflags("cl::/Zc:inline", "cl::/bigobj")
 
         -- emscripten needs SSE emulation via WASM SIMD
+        -- and native WASM exceptions (required for JSPI compatibility)
         if is_plat("wasm") then
             add_cxxflags("-msimd128", "-msse", "-msse2", "-msse4.2", {force = true})
+            add_cxxflags("-fwasm-exceptions", {force = true})
         end
     end)
 end)
