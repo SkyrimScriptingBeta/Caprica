@@ -168,8 +168,9 @@ std::string_view findScriptName(const std::string_view& data, const std::string_
     if (next == std::string_view::npos)
       next = data.size() - 1;
     auto line = data.substr(last, next - last);
-    auto begin = line.find_first_not_of(" \t");
-    if (strnicmp(line.substr(begin, startstring.size()).data(), startstring.data(), startstring.size()) == 0) {
+    auto begin = line.find_first_not_of(" \t\r");
+    if (begin != std::string_view::npos &&
+        strnicmp(line.substr(begin, startstring.size()).data(), startstring.data(), startstring.size()) == 0) {
       auto first = line.find_first_not_of(" \t", startstring.size() + begin);
       return line.substr(first, line.find_first_of(" \t", first) - first);
     }
